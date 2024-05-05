@@ -9,13 +9,17 @@ export const one: Examples[] = [
   {
     example: '1',
     props: {
-      value: 18
+      value: 18,
+      variant: 'descending',
+      showAnimation: true
     }
   },
   {
     example: '1',
     props: {
-      value: 42
+      value: 42,
+      variant: 'descending',
+      showAnimation: true
     }
   },
   {
@@ -37,6 +41,8 @@ export const two: Examples[] = [
     example: '2',
     props: {
       value: 24,
+      variant: 'descending',
+      showAnimation: true,
       primary: 'danger',
       secondary: 'danger'
     }
@@ -45,6 +51,8 @@ export const two: Examples[] = [
     example: '2',
     props: {
       value: 33,
+      variant: 'descending',
+      showAnimation: true,
       primary: 'warning',
       secondary: 'warning'
     }
@@ -72,6 +80,8 @@ export const three: Examples[] = [
     example: '3',
     props: {
       value: 15,
+      variant: 'descending',
+      showAnimation: true,
       primary: {
         0: 'var(--ds-pink-100)',
         10: 'var(--ds-pink-200)',
@@ -90,6 +100,8 @@ export const three: Examples[] = [
     example: '3',
     props: {
       value: 55,
+      variant: 'descending',
+      showAnimation: true,
       primary: {
         0: 'var(--ds-pink-100)',
         10: 'var(--ds-pink-200)',
@@ -148,6 +160,8 @@ export const four: Examples[] = [
     props: {
       value: 75,
       equal: true,
+      variant: 'descending',
+      showAnimation: true,
       primary: {
         0: 'var(--ds-green-100)',
         10: 'var(--ds-green-200)',
@@ -179,6 +193,8 @@ export const four: Examples[] = [
     props: {
       value: 60,
       equal: true,
+      variant: 'descending',
+      showAnimation: true,
       primary: {
         0: 'var(--ds-green-100)',
         10: 'var(--ds-green-200)',

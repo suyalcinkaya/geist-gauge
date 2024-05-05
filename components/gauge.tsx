@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import type { CSSProperties, SVGProps } from 'react'
+import { useEffect, useState, type CSSProperties, type SVGProps } from 'react'
 
 export interface GaugeProps extends Omit<SVGProps<SVGSVGElement>, 'className'> {
   value: number
@@ -8,23 +8,22 @@ export interface GaugeProps extends Omit<SVGProps<SVGSVGElement>, 'className'> {
   strokeWidth?: number
   equal?: boolean
   showValue?: boolean
-
+  variant?: 'ascending' | 'descending'
+  showAnimation?: boolean
   primary?: 'danger' | 'warning' | 'success' | 'info' | string | { [key: number]: string }
   secondary?: 'danger' | 'warning' | 'success' | 'info' | string | { [key: number]: string }
-
   transition?: {
     length?: number
     step?: number
     delay?: number
   }
-
   className?:
     | string
     | {
         svgClassName?: string
         primaryClassName?: string
         secondaryClassName?: string
-        textClassName?: string
+        valueClassName?: string
       }
 }
 
@@ -49,10 +48,10 @@ export function Gauge({
   strokeWidth = 10,
   equal = false,
   showValue = true,
-
+  variant = 'ascending',
+  showAnimation = false,
   primary,
   secondary,
-
   transition = {
     length: 1000, // ms
     step: 200, // ms
@@ -63,7 +62,16 @@ export function Gauge({
 
   ...props
 }: GaugeProps) {
-  const strokePercent = value // %
+  const isAscendingVariant = variant === 'ascending'
+  const [animatedValue, setAnimatedValue] = useState(
+    showAnimation ? (isAscendingVariant ? 0 : 100) : value
+  )
+
+  useEffect(() => {
+    if (showAnimation) setAnimatedValue(value)
+  }, [showAnimation, value])
+
+  const strokePercent = showAnimation ? animatedValue : value // %
 
   const circleSize = 100 // px
   const radius = circleSize / 2 - strokeWidth / 2
@@ -268,62 +276,62 @@ export function Gauge({
   }
 
   return (
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      viewBox={`0 0 ${circleSize} ${circleSize}`}
-      shapeRendering='crispEdges'
-      width={size}
-      height={size}
-      style={{ userSelect: 'none' }}
-      strokeWidth={2} // TODO: not needed?
-      fill='none'
-      className={cn('', typeof className === 'string' ? className : className?.svgClassName)}
-      {...props}
-    >
-      {/*secondary*/}
-      <circle
-        cx={circleSize / 2}
-        cy={circleSize / 2}
-        r={radius}
-        style={{
-          ...circleStyles,
-          strokeDasharray: secondaryStrokeDasharray(),
-          transform: secondaryTransform(),
-          stroke: secondaryStroke(),
-          opacity: secondaryOpacity()
-        }}
-        className={cn('', typeof className === 'object' && className?.secondaryClassName)}
-      />
+    <div className='flex items-center justify-center'>
+      <svg
+        xmlns='http://www.w3.org/2000/svg'
+        viewBox={`0 0 ${circleSize} ${circleSize}`}
+        shapeRendering='crispEdges'
+        width={size}
+        height={size}
+        style={{ userSelect: 'none' }}
+        strokeWidth={2} // TODO: not needed?
+        fill='none'
+        className={cn(
+          !isAscendingVariant && '-scale-x-100',
+          typeof className === 'string' ? className : className?.svgClassName
+        )}
+        {...props}
+      >
+        {/*secondary*/}
+        <circle
+          cx={circleSize / 2}
+          cy={circleSize / 2}
+          r={radius}
+          style={{
+            ...circleStyles,
+            strokeDasharray: secondaryStrokeDasharray(),
+            transform: secondaryTransform(),
+            stroke: secondaryStroke(),
+            opacity: secondaryOpacity()
+          }}
+          className={cn('', typeof className === 'object' && className?.secondaryClassName)}
+        />
 
-      {/* primary */}
-      <circle
-        cx={circleSize / 2}
-        cy={circleSize / 2}
-        r={radius}
-        style={{
-          ...circleStyles,
-          strokeDasharray: primaryStrokeDasharray(),
-          transform: primaryTransform(),
-          stroke: primaryStroke(),
-          opacity: primaryOpacity()
-        }}
-        className={cn('', typeof className === 'object' && className?.primaryClassName)}
-      />
-
+        {/* primary */}
+        <circle
+          cx={circleSize / 2}
+          cy={circleSize / 2}
+          r={radius}
+          style={{
+            ...circleStyles,
+            strokeDasharray: primaryStrokeDasharray(),
+            transform: primaryTransform(),
+            stroke: primaryStroke(),
+            opacity: primaryOpacity()
+          }}
+          className={cn('', typeof className === 'object' && className?.primaryClassName)}
+        />
+      </svg>
       {showValue && (
-        <text
-          x='50%'
-          y='50%'
-          textAnchor='middle'
-          dominantBaseline='middle'
-          alignmentBaseline='central'
-          fill='currentColor'
-          fontSize={36}
-          className={cn('', typeof className === 'object' && className?.textClassName)}
+        <span
+          className={cn(
+            'index-0 absolute text-4xl',
+            typeof className === 'object' && className?.valueClassName
+          )}
         >
-          {Math.round(strokePercent)}
-        </text>
+          {Math.round(value)}
+        </span>
       )}
-    </svg>
+    </div>
   )
 }
