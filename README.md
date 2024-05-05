@@ -4,23 +4,20 @@ This is a replication of Vercel's [Gauge](https://vercel.com/design/gauge) compo
 
 ![gauge demo image](./app/opengraph-image.png)
 
-
 ## Installation
 
 ### Requirements
 
 - Will work in any React application.
 - Tailwind is NOT a requirement, but can be used to adjust the styling of this component through the className prop.
-- This is a standalone component that you need to copy/paste to your codebase. I might make it an NPM package in the future. 
-
+- This is a standalone component that you need to copy/paste to your codebase. I might make it an NPM package in the future.
 
 1. Copy the `gauge` component from here: [gauge.tsx](https://github.com/mfts/gauge-demo/blob/main/app/gauge.tsx)
 
-
 2. Copy the required colors from [global.css](https://github.com/ajayvignesh01/geist-gauge). At minimum, you will need gray, red, amber, blue, and green.
 
-
 3. Import into your page
+
    ```tsx
    import { Gauge } from "@/components/gauge";
 
@@ -35,7 +32,6 @@ This is a replication of Vercel's [Gauge](https://vercel.com/design/gauge) compo
    }
    ```
 
-
 ## API
 
 The `Gauge` component requires a `value` prop and supports many others to customize it according to your needs.
@@ -46,12 +42,13 @@ The `Gauge` component requires a `value` prop and supports many others to custom
 - `strokeWidth`: a **number** to set the arc thickness. Defaults to `10px`.
 - `equal`: a **boolean** to determine whether the gauge should have equal primary and secondary arc lengths. Defaults to `false`.
 - `showValue`: a **boolean** to determine whether the % value should be shown inside the gauge. Defaults to `true`.
+- `variant`: a **string** to determine the direction of the gauge. Can be either `ascending` or `descending`. Defaults to `ascending`.
+- `showAnimation`: a **boolean** to determine whether the gauge should animate on load. Defaults to `false`.
 - `primary` - a **string** color value for the primary arc. You can also pass an **array** with threshold values and the respective colors to make it dynamic. Defaults to a dynamic range with 25% steps going `red, amber, blue, green`.
 - `secondary` - a **string** color value for the secondary arc. You can also pass an **array** with threshold values and the respective colors to make it dynamic. Defaults to a hue of `gray`.
 - `transition` - an **array** of transition settings for the gauge's animation, specifying the length, step, and delay of transitions represented in ms. Defaults to `1000, 200, 0` respectively.
 - `className` - a **string** to represent the className of the svg. You can also pass an **object** with svgClassName, primaryClassName, secondaryClassName, and textClassName for more customization.
 - `props` - any other prop accepted by a React SVG element.
-
 
 ## Inspiration & Credits
 
