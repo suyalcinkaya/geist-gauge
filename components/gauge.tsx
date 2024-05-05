@@ -35,6 +35,8 @@ export interface GaugeProps extends Omit<SVGProps<SVGSVGElement>, 'className'> {
  * @param strokeWidth - Stroke width of the gauge. Defaults to 10px.
  * @param equal - Determines if the gauge should have equal primary and secondary stroke lengths. Defaults to false.
  * @param showValue - Option to display the numeric value inside the gauge. Defaults to true.
+ * @param variant - Direction of the gauge's animation. Defaults to 'ascending'.
+ * @param showAnimation - Option to animate the gauge's progress. Defaults to false.
  * @param primary - Primary color or set of colors for the gauge, with optional threshold values to determine color changes.
  * @param secondary - Secondary color or set of colors for the gauge, similar to `primary`.
  * @param transition - Transition settings for the gauge's animation, specifying the length, step, and delay of transitions.
@@ -57,14 +59,12 @@ export function Gauge({
     step: 200, // ms
     delay: 0 // ms
   },
-
   className,
-
   ...props
 }: GaugeProps) {
   const isAscendingVariant = variant === 'ascending'
   const [animatedValue, setAnimatedValue] = useState(
-    showAnimation ? (isAscendingVariant ? 0 : 100) : value
+    showAnimation ? (isAscendingVariant ? 0 : 100) : value // Start value for animation
   )
 
   useEffect(() => {
@@ -113,12 +113,18 @@ export function Gauge({
     if (offsetFactor > 0 && strokePercent > 100 - gapPercent * 2 * offsetFactor) {
       // calculation to gradually shift back to 0 offset as progress nears 100% when offsetFactor > 0
       const add = 0.5 * (-strokePercent + 100)
+      const rotateDegValue = -90 + add * percentToDegree
 
-      return `rotate(${-90 + add * percentToDegree}deg)`
+      return isAscendingVariant
+        ? `rotate(${rotateDegValue}deg)`
+        : `rotate(${-1 * rotateDegValue}deg) scaleX(-1)`
     } else {
       const add = gapPercent * offsetFactor
+      const rotateDegValue = -90 + add * percentToDegree
 
-      return `rotate(${-90 + add * percentToDegree}deg)`
+      return isAscendingVariant
+        ? `rotate(${rotateDegValue}deg)`
+        : `rotate(${-1 * rotateDegValue}deg) scaleX(-1)`
     }
   }
 
@@ -126,12 +132,18 @@ export function Gauge({
     if (offsetFactorSecondary < 1 && strokePercent < gapPercent * 2 * offsetFactorSecondary) {
       // calculation to gradually shift back to 1 secondary offset as progress nears 100% when offsetFactorSecondary < 1
       const subtract = 0.5 * strokePercent
+      const rotateDegValue = -90 + subtract * percentToDegree
 
-      return `rotate(${360 - 90 - subtract * percentToDegree}deg) scaleY(-1)`
+      return isAscendingVariant
+        ? `rotate(${rotateDegValue}deg) scaleY(-1)`
+        : `rotate(${-1 * rotateDegValue}deg) scaleY(-1) scaleX(-1)`
     } else {
       const subtract = gapPercent * offsetFactorSecondary
+      const rotateDegValue = 360 - 90 - subtract * percentToDegree
 
-      return `rotate(${360 - 90 - subtract * percentToDegree}deg) scaleY(-1)`
+      return isAscendingVariant
+        ? `rotate(${rotateDegValue}deg) scaleY(-1)`
+        : `rotate(${-1 * rotateDegValue}deg) scaleY(-1) scaleX(-1)`
     }
   }
 
@@ -266,72 +278,72 @@ export function Gauge({
   }
 
   const circleStyles: CSSProperties = {
+    transition: `all ${transition?.length}ms cubic-bezier(0.785, 0.135, 0.15, 0.86) ${transition?.delay}ms`,
+    transformOrigin: '50% 50%'
+  }
+
+  const circleProps: SVGProps<SVGCircleElement> = {
+    cx: circleSize / 2,
+    cy: circleSize / 2,
+    r: radius,
     strokeLinecap: 'round',
     strokeLinejoin: 'round',
     strokeDashoffset: 0,
-    strokeWidth: strokeWidth,
-    transition: `all ${transition?.length}ms ease ${transition?.delay}ms`,
-    transformOrigin: '50% 50%',
+    strokeWidth,
     shapeRendering: 'geometricPrecision'
   }
 
   return (
-    <div className='flex items-center justify-center'>
-      <svg
-        xmlns='http://www.w3.org/2000/svg'
-        viewBox={`0 0 ${circleSize} ${circleSize}`}
-        shapeRendering='crispEdges'
-        width={size}
-        height={size}
-        style={{ userSelect: 'none' }}
-        strokeWidth={2} // TODO: not needed?
-        fill='none'
-        className={cn(
-          !isAscendingVariant && '-scale-x-100',
-          typeof className === 'string' ? className : className?.svgClassName
-        )}
-        {...props}
-      >
-        {/*secondary*/}
-        <circle
-          cx={circleSize / 2}
-          cy={circleSize / 2}
-          r={radius}
-          style={{
-            ...circleStyles,
-            strokeDasharray: secondaryStrokeDasharray(),
-            transform: secondaryTransform(),
-            stroke: secondaryStroke(),
-            opacity: secondaryOpacity()
-          }}
-          className={cn('', typeof className === 'object' && className?.secondaryClassName)}
-        />
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      viewBox={`0 0 ${circleSize} ${circleSize}`}
+      shapeRendering='crispEdges'
+      width={size}
+      height={size}
+      style={{ userSelect: 'none' }}
+      fill='none'
+      className={cn('', typeof className === 'string' ? className : className?.svgClassName)}
+      {...props}
+    >
+      {/*secondary*/}
+      <circle
+        {...circleProps}
+        style={{
+          ...circleStyles,
+          strokeDasharray: secondaryStrokeDasharray(),
+          transform: secondaryTransform(),
+          stroke: secondaryStroke(),
+          opacity: secondaryOpacity()
+        }}
+        className={cn('', typeof className === 'object' && className?.secondaryClassName)}
+      />
 
-        {/* primary */}
-        <circle
-          cx={circleSize / 2}
-          cy={circleSize / 2}
-          r={radius}
-          style={{
-            ...circleStyles,
-            strokeDasharray: primaryStrokeDasharray(),
-            transform: primaryTransform(),
-            stroke: primaryStroke(),
-            opacity: primaryOpacity()
-          }}
-          className={cn('', typeof className === 'object' && className?.primaryClassName)}
-        />
-      </svg>
+      {/* primary */}
+      <circle
+        {...circleProps}
+        style={{
+          ...circleStyles,
+          strokeDasharray: primaryStrokeDasharray(),
+          transform: primaryTransform(),
+          stroke: primaryStroke(),
+          opacity: primaryOpacity()
+        }}
+        className={cn('', typeof className === 'object' && className?.primaryClassName)}
+      />
       {showValue && (
-        <span
-          className={cn(
-            'index-0 absolute text-4xl',
-            typeof className === 'object' && className?.valueClassName
-          )}
+        <text
+          x='50%'
+          y='50%'
+          textAnchor='middle'
+          dominantBaseline='middle'
+          alignmentBaseline='central'
+          fill='currentColor'
+          fontSize={36}
+          className={cn('', typeof className === 'object' && className?.valueClassName)}
         >
           {Math.round(value)}
-        </span>
+        </text>
       )}
-    </div>
+    </svg>
   )
 }

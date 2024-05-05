@@ -25,7 +25,8 @@ export const one: Examples[] = [
   {
     example: '1',
     props: {
-      value: 66
+      value: 66,
+      showAnimation: true
     }
   },
   {
